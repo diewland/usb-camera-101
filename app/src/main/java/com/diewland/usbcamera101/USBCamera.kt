@@ -100,7 +100,7 @@ class USBCamera(act: Activity, camView: UVCCameraTextureView) {
         mUVCCameraView.setCallback(mCallback)
         mCameraHelper = UVCCameraHelper.getInstance()
 
-        // set default preview size
+        // set default preview size ( default is 640x480 )
         // mCameraHelper.setDefaultPreviewSize(1280, 720)
 
         // set default frame format，default is UVCCameraHelper.Frame_FORMAT_MPEG
@@ -150,7 +150,9 @@ class USBCamera(act: Activity, camView: UVCCameraTextureView) {
             if (!isRequest) {
                 isRequest = true;
                 if (mCameraHelper != null) {
-                    mCameraHelper.requestPermission(0);
+                    // scan logitech device (vendorId == 1133) TODO hardcode
+                    val idx = mCameraHelper.usbDeviceList.indexOfFirst { it.vendorId == 1133 }
+                    mCameraHelper.requestPermission(idx);
                 }
             }
         }
