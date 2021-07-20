@@ -1,6 +1,5 @@
 package com.diewland.usbcamera101
 
-import android.app.Activity
 import android.hardware.usb.UsbDevice
 import android.os.Handler
 import android.os.Looper.getMainLooper
@@ -14,7 +13,7 @@ import com.serenegiant.usb.common.AbstractUVCCameraHandler.OnCaptureListener
 import com.serenegiant.usb.widget.CameraViewInterface
 import com.serenegiant.usb.widget.UVCCameraTextureView
 
-class USBCamera(act: Activity, camView: UVCCameraTextureView) {
+class USBCamera(act: MainActivity, camView: UVCCameraTextureView) {
 
     private val TAG = "USBCAM"
 
@@ -111,9 +110,16 @@ class USBCamera(act: Activity, camView: UVCCameraTextureView) {
 
         mCameraHelper.initUSBMonitor(act, mUVCCameraView, mDevConnectListener)
 
-        //mCameraHelper.setOnPreviewFrameListener { nv21Yuv ->
-        //    Log.d(TAG, "onPreviewResult: " + nv21Yuv.size)
-        //}
+        mCameraHelper.setOnPreviewFrameListener { nv21Yuv ->
+            // Log.d(TAG, "onPreviewResult: " + nv21Yuv.size)
+
+            // clone camera stream to image view
+            // https://stackoverflow.com/a/43551798/466693
+            act.aIn.copyFrom(nv21Yuv)
+            act.yuvToRgbIntrinsic.forEach(act.aOut)
+            act.aOut.copyTo(act.bmpOut)
+            act.ivPreview.setImageBitmap(act.bmpOut)
+        }
 
         isInit = true
     }
