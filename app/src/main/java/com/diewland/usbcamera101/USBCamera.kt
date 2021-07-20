@@ -102,6 +102,7 @@ class USBCamera(act: Activity, camView: UVCCameraTextureView) {
 
         // set default preview size ( default is 640x480 )
         // mCameraHelper.setDefaultPreviewSize(1280, 720)
+        // mCameraHelper.setDefaultPreviewSize(1920, 1080)
 
         // set default frame format，default is UVCCameraHelper.Frame_FORMAT_MPEG
         // if using mpeg can not record mp4,please try yuv
