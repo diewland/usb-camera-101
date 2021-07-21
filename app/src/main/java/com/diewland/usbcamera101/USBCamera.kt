@@ -151,11 +151,11 @@ class USBCamera(act: MainActivity, camView: UVCCameraTextureView) {
                     // calc fps
                     val now = System.currentTimeMillis()
                     val diff = now - lastRenderTime
-                    //if (Config.FPS != null) {
-                    //    val limit = 1000 / Config.FPS
-                    //    if (diff < limit) return@setOnPreviewFrameListener
-                    //    lastRenderTime = now
-                    //}
+                    if (Config.MAX_FPS != null) {
+                        val limit = 1000 / Config.MAX_FPS
+                        if (diff < limit) return@addOnSuccessListener
+                        lastRenderTime = now
+                    }
                     lastRenderTime = now
                     act.tvFps.text = "fps: %.2f".format(1000f/diff)
                 }

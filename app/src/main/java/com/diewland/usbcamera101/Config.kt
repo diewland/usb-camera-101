@@ -12,6 +12,6 @@ object Config {
     const val CAMERA_HEIGHT = 480
 
     // frame per sec
-    // val FPS: Long? = 30
+    val MAX_FPS: Long? = 30
 
 }
