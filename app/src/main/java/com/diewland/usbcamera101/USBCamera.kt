@@ -113,6 +113,8 @@ class USBCamera(act: MainActivity, camView: UVCCameraTextureView) {
         mCameraHelper.setOnPreviewFrameListener { nv21Yuv ->
             // Log.d(TAG, "onPreviewResult: " + nv21Yuv.size)
 
+            // TODO control fps, render when diff time OK
+
             // clone camera stream to image view
             // https://stackoverflow.com/a/43551798/466693
             act.aIn.copyFrom(nv21Yuv)
