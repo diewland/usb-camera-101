@@ -1,5 +1,8 @@
 package com.diewland.usbcamera101
 
+import android.graphics.Canvas
+import android.graphics.Color
+import android.graphics.Paint
 import android.hardware.usb.UsbDevice
 import android.os.Handler
 import android.os.Looper.getMainLooper
@@ -7,6 +10,7 @@ import android.text.TextUtils
 import android.util.Log
 import android.view.Surface
 import android.widget.Toast
+import com.google.mlkit.vision.common.InputImage
 import com.jiangdg.usbcamera.UVCCameraHelper
 import com.jiangdg.usbcamera.utils.FileUtils
 import com.serenegiant.usb.common.AbstractUVCCameraHandler.OnCaptureListener
@@ -26,8 +30,15 @@ class USBCamera(act: MainActivity, camView: UVCCameraTextureView) {
     private var isPreview = false
 
     private var lastRenderTime = System.currentTimeMillis()
+    private lateinit var p: Paint
 
     fun open() {
+        // paint style
+        p = Paint()
+        p.style = Paint.Style.STROKE
+        p.color = Color.YELLOW
+        p.strokeWidth = 5f
+
         initCamHelper()
         onStart()
     }
@@ -114,23 +125,43 @@ class USBCamera(act: MainActivity, camView: UVCCameraTextureView) {
         mCameraHelper.setOnPreviewFrameListener { nv21Yuv ->
             // Log.d(TAG, "onPreviewResult: " + nv21Yuv.size)
 
-            // control fps
-            if (Config.FPS != null) {
-                val now = System.currentTimeMillis()
-                val diff = now - lastRenderTime
-                val limit = 1000 / Config.FPS
-                Log.d(TAG, "$diff/$limit..")
-                if (diff < limit) return@setOnPreviewFrameListener
-                Log.d(TAG, "render!")
-                lastRenderTime = now
-            }
-
-            // clone camera stream to image view
+            // convert from nv21Yuv BA to Bitmap
             // https://stackoverflow.com/a/43551798/466693
             act.aIn.copyFrom(nv21Yuv)
             act.yuvToRgbIntrinsic.forEach(act.aOut)
             act.aOut.copyTo(act.bmpOut)
-            act.ivPreview.setImageBitmap(act.bmpOut)
+
+            // detection
+            val image = InputImage.fromBitmap(act.bmpOut, 0)
+            act.detector.process(image)
+                .addOnSuccessListener {
+                    if (it.size > 0) {
+                        val canvas = Canvas(act.bmpOut)
+                        it.forEach { face ->
+                            // update frame color from box size
+                            p.color = when {
+                                face.boundingBox.width() > 300 -> Color.GREEN
+                                else -> Color.YELLOW
+                            }
+                            canvas.drawRect(face.boundingBox, p)
+                        }
+                    }
+                    act.ivPreview.setImageBitmap(act.bmpOut)
+
+                    // calc fps
+                    val now = System.currentTimeMillis()
+                    val diff = now - lastRenderTime
+                    //if (Config.FPS != null) {
+                    //    val limit = 1000 / Config.FPS
+                    //    if (diff < limit) return@setOnPreviewFrameListener
+                    //    lastRenderTime = now
+                    //}
+                    lastRenderTime = now
+                    act.tvFps.text = "fps: %.2f".format(1000f/diff)
+                }
+                .addOnFailureListener {
+                    Log.e(TAG, it.stackTraceToString())
+                }
         }
 
         isInit = true

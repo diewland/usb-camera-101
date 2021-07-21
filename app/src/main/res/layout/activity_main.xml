@@ -24,7 +24,8 @@
                 android:layout_marginLeft="5dp"
                 android:layout_marginRight="5dp"
                 android:layout_weight="1"
-                android:text="Open" />
+                android:text="Open"
+                android:textSize="34sp" />
 
             <Button
                 android:id="@+id/btn_capture"
@@ -33,7 +34,8 @@
                 android:layout_marginLeft="5dp"
                 android:layout_marginRight="5dp"
                 android:layout_weight="1"
-                android:text="Capture" />
+                android:text="Capture"
+                android:textSize="34sp" />
 
             <Button
                 android:id="@+id/btn_close"
@@ -42,7 +44,8 @@
                 android:layout_marginLeft="5dp"
                 android:layout_marginRight="5dp"
                 android:layout_weight="1"
-                android:text="Close" />
+                android:text="Close"
+                android:textSize="34sp" />
 
         </LinearLayout>
 
@@ -51,13 +54,20 @@
     <com.serenegiant.usb.widget.UVCCameraTextureView
         android:id="@+id/camera_view"
         android:layout_width="fill_parent"
-        android:layout_height="wrap_content"
+        android:layout_height="match_parent"
         android:layout_weight="1" />
+
+    <TextView
+        android:id="@+id/tv_fps"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="FPS: ..."
+        android:textSize="72sp" />
 
     <ImageView
         android:id="@+id/iv_preview"
         android:layout_width="fill_parent"
-        android:layout_height="wrap_content"
+        android:layout_height="match_parent"
         android:layout_weight="1"
         tools:srcCompat="@tools:sample/avatars" />
 

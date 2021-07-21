@@ -45,4 +45,7 @@ dependencies {
 
     // usb camera
     implementation 'com.github.jiangdongguo:AndroidUSBCamera:2.3.6'
+
+    // MLKit face detection
+    implementation 'com.google.mlkit:face-detection:16.1.2'
 }

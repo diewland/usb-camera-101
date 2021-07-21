@@ -8,10 +8,10 @@ object Config {
     // 800x600
     // 640x480 <-- default
     // 320x240
-    const val CAMERA_WIDTH = 1920
-    const val CAMERA_HEIGHT = 1080
+    const val CAMERA_WIDTH = 640
+    const val CAMERA_HEIGHT = 480
 
     // frame per sec
-    val FPS: Long? = null
+    // val FPS: Long? = 30
 
 }
