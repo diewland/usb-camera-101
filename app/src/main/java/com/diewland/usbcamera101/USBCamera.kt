@@ -1,45 +1,70 @@
 package com.diewland.usbcamera101
 
-import android.graphics.Canvas
-import android.graphics.Color
-import android.graphics.Paint
+import android.app.Activity
+import android.graphics.Bitmap
 import android.hardware.usb.UsbDevice
 import android.os.Handler
 import android.os.Looper.getMainLooper
+import android.renderscript.Allocation
+import android.renderscript.Element
+import android.renderscript.RenderScript
+import android.renderscript.ScriptIntrinsicYuvToRGB
 import android.text.TextUtils
 import android.util.Log
 import android.view.Surface
 import android.widget.Toast
 import com.google.mlkit.vision.common.InputImage
+import com.google.mlkit.vision.face.Face
+import com.google.mlkit.vision.face.FaceDetection
+import com.google.mlkit.vision.face.FaceDetector
 import com.jiangdg.usbcamera.UVCCameraHelper
 import com.jiangdg.usbcamera.utils.FileUtils
 import com.serenegiant.usb.common.AbstractUVCCameraHandler.OnCaptureListener
 import com.serenegiant.usb.widget.CameraViewInterface
 import com.serenegiant.usb.widget.UVCCameraTextureView
 
-class USBCamera(act: MainActivity, camView: UVCCameraTextureView) {
+class USBCamera(private val act: Activity,
+                private val mUVCCameraView: UVCCameraTextureView,
+                private val successCallback: (Bitmap, List<Face>, Float) -> Unit,
+                private val failCallback: ((Exception) -> Unit)?=null,
+                private val width: Int = 640,
+                private val height: Int = 480,
+                private val maxFps: Int = 10) {
 
-    private val TAG = "USBCAM"
-
-    private val act = act
-    private val mUVCCameraView = camView
-    lateinit var mCameraHelper: UVCCameraHelper
-
+    // state
     private var isInit = false
     private var isRequest = false
     private var isPreview = false
-
     private var lastRenderTime = System.currentTimeMillis()
-    private val p: Paint = Paint()
+
+    // helper
+    lateinit var mCameraHelper: UVCCameraHelper
+
+    // converter
+    private var yuvToRgbIntrinsic: ScriptIntrinsicYuvToRGB
+    private var aIn: Allocation
+    private var aOut: Allocation
+    private var bmpOut: Bitmap
+
+    // detection
+    private var detector: FaceDetector
 
     init {
-        // define paint
-        p.style = Paint.Style.STROKE
-        p.color = Color.YELLOW
-        p.strokeWidth = 5f
+        // prepare image converter
+        // https://stackoverflow.com/a/43551798/466693
+        val count = width * height * 3 / 2 // this is 12 bit per pixel
+        val rs = RenderScript.create(act)
+        yuvToRgbIntrinsic = ScriptIntrinsicYuvToRGB.create(rs, Element.U8_4(rs));
+        aIn = Allocation.createSized(rs, Element.U8(rs), count)
+        bmpOut = Bitmap.createBitmap(width, height, Bitmap.Config.ARGB_8888)
+        aOut = Allocation.createFromBitmap(rs, bmpOut)
+        yuvToRgbIntrinsic.setInput(aIn)
+
+        // initial fact detector
+        detector = FaceDetection.getClient()
     }
 
-    fun open() {
+    fun open() { // TODO crash on first time open
         initCamHelper()
         onStart()
     }
@@ -114,7 +139,7 @@ class USBCamera(act: MainActivity, camView: UVCCameraTextureView) {
         mCameraHelper = UVCCameraHelper.getInstance()
 
         // set default preview size
-        mCameraHelper.setDefaultPreviewSize(Config.CAMERA_WIDTH, Config.CAMERA_HEIGHT)
+        mCameraHelper.setDefaultPreviewSize(width, height)
 
         // set default frame format，default is UVCCameraHelper.Frame_FORMAT_MPEG
         // if using mpeg can not record mp4,please try yuv
@@ -124,44 +149,27 @@ class USBCamera(act: MainActivity, camView: UVCCameraTextureView) {
         mCameraHelper.initUSBMonitor(act, mUVCCameraView, mDevConnectListener)
 
         mCameraHelper.setOnPreviewFrameListener { nv21Yuv ->
-            // Log.d(TAG, "onPreviewResult: " + nv21Yuv.size)
-
             // convert from nv21Yuv BA to Bitmap
-            // https://stackoverflow.com/a/43551798/466693
-            act.aIn.copyFrom(nv21Yuv)
-            act.yuvToRgbIntrinsic.forEach(act.aOut)
-            act.aOut.copyTo(act.bmpOut)
+            aIn.copyFrom(nv21Yuv)
+            yuvToRgbIntrinsic.forEach(aOut)
+            aOut.copyTo(bmpOut)
 
-            // detection
-            val image = InputImage.fromBitmap(act.bmpOut, 0)
-            act.detector.process(image)
+            // detect face
+            val image = InputImage.fromBitmap(bmpOut, 0)
+            detector.process(image)
                 .addOnSuccessListener {
-                    if (it.size > 0) {
-                        val canvas = Canvas(act.bmpOut)
-                        it.forEach { face ->
-                            // update frame color from box size
-                            p.color = when {
-                                face.boundingBox.width() > 300 -> Color.GREEN
-                                else -> Color.YELLOW
-                            }
-                            canvas.drawRect(face.boundingBox, p)
-                        }
-                    }
-                    act.ivPreview.setImageBitmap(act.bmpOut)
-
                     // calc fps
                     val now = System.currentTimeMillis()
                     val diff = now - lastRenderTime
-                    if (Config.MAX_FPS != null) {
-                        val limit = 1000 / Config.MAX_FPS
-                        if (diff < limit) return@addOnSuccessListener
-                        lastRenderTime = now
-                    }
+                    val limit = 1000f / maxFps // TODO
+                    if (diff < limit) return@addOnSuccessListener
                     lastRenderTime = now
-                    act.tvFps.text = "fps: %.2f".format(1000f/diff)
+                    val fps = 1000f / diff // TODO
+
+                    successCallback(bmpOut, it, fps)
                 }
                 .addOnFailureListener {
-                    Log.e(TAG, it.stackTraceToString())
+                    failCallback?.invoke(it)
                 }
         }
 
@@ -258,7 +266,7 @@ class USBCamera(act: MainActivity, camView: UVCCameraTextureView) {
     }
 
     private fun showShortMsg(msg: String) {
-        Log.d(TAG, msg)
+        Log.d("USBCAM", msg)
     }
 
 }

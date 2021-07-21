@@ -1,51 +1,47 @@
 package com.diewland.usbcamera101
 
 import android.graphics.Bitmap
+import android.graphics.Canvas
+import android.graphics.Color
+import android.graphics.Paint
 import android.os.Bundle
-import android.renderscript.Allocation
-import android.renderscript.Element
-import android.renderscript.RenderScript
-import android.renderscript.ScriptIntrinsicYuvToRGB
+import android.util.Log
 import android.widget.Button
 import android.widget.ImageView
 import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
-import com.google.mlkit.vision.face.FaceDetection
-import com.google.mlkit.vision.face.FaceDetector
+import com.google.mlkit.vision.face.Face
+import com.serenegiant.usb.widget.UVCCameraTextureView
+
+const val TAG = "USBCAM_MAIN"
 
 class MainActivity : AppCompatActivity() {
 
     lateinit var usbCam: USBCamera
     lateinit var ivPreview: ImageView
     lateinit var tvFps: TextView
-
-    lateinit var yuvToRgbIntrinsic: ScriptIntrinsicYuvToRGB
-    lateinit var aIn: Allocation
-    lateinit var aOut: Allocation
-    lateinit var bmpOut: Bitmap
-
-    lateinit var detector: FaceDetector
+    lateinit var p: Paint
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
 
-        usbCam = USBCamera(this, findViewById(R.id.camera_view))
+        val camView = findViewById<UVCCameraTextureView>(R.id.camera_view)
         ivPreview = findViewById(R.id.iv_preview)
         tvFps = findViewById(R.id.tv_fps)
 
-        // clone camera stream to image view
-        // https://stackoverflow.com/a/43551798/466693
-        val count = Config.CAMERA_WIDTH * Config.CAMERA_HEIGHT * 3 / 2 // this is 12 bit per pixel
-        val rs = RenderScript.create(this)
-        yuvToRgbIntrinsic = ScriptIntrinsicYuvToRGB.create(rs, Element.U8_4(rs));
-        aIn = Allocation.createSized(rs, Element.U8(rs), count)
-        bmpOut = Bitmap.createBitmap(Config.CAMERA_WIDTH, Config.CAMERA_HEIGHT, Bitmap.Config.ARGB_8888)
-        aOut = Allocation.createFromBitmap(rs, bmpOut)
-        yuvToRgbIntrinsic.setInput(aIn)
+        // define paint
+        p = Paint()
+        p.style = Paint.Style.STROKE
+        p.color = Color.YELLOW
+        p.strokeWidth = 5f
 
-        // fact detection
-        detector = FaceDetection.getClient()
+        // init usb cam
+        usbCam = USBCamera(this, camView, { bmp, faces, fps ->
+            detectSuccess(bmp, faces, fps)
+        }, {
+            Log.e(TAG, it.stackTraceToString())
+        })
 
         // bind screen buttons
         findViewById<Button>(R.id.btn_open).setOnClickListener { usbCam.open() }
@@ -66,6 +62,25 @@ class MainActivity : AppCompatActivity() {
     override fun onDestroy() {
         super.onDestroy()
         usbCam.onDestroy()
+    }
+
+    private fun detectSuccess(bmp: Bitmap, faces: List<Face>, fps: Float) {
+        // show fps
+        tvFps.text = "FPS: %.2f".format(fps)
+        // draw face box
+        if (faces.isNotEmpty()) {
+            val canvas = Canvas(bmp)
+            faces.forEach { face ->
+                // update frame color from box size
+                p.color = when {
+                    face.boundingBox.width() > 300 -> Color.GREEN
+                    else -> Color.YELLOW
+                }
+                canvas.drawRect(face.boundingBox, p)
+            }
+        }
+        // update image view
+        ivPreview.setImageBitmap(bmp)
     }
 
 }
