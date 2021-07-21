@@ -29,12 +29,11 @@ class MainActivity : AppCompatActivity() {
 
         // clone camera stream to image view
         // https://stackoverflow.com/a/43551798/466693
-        val camWidth = 640
-        val camHeight = 480
+        val count = Config.CAMERA_WIDTH * Config.CAMERA_HEIGHT * 3 / 2 // this is 12 bit per pixel
         val rs = RenderScript.create(this)
         yuvToRgbIntrinsic = ScriptIntrinsicYuvToRGB.create(rs, Element.U8_4(rs));
-        aIn = Allocation.createSized(rs, Element.U8(rs), camWidth * camHeight * 3 / 2) // this is 12 bit per pixel
-        bmpOut = Bitmap.createBitmap(camWidth, camHeight, Bitmap.Config.ARGB_8888)
+        aIn = Allocation.createSized(rs, Element.U8(rs), count)
+        bmpOut = Bitmap.createBitmap(Config.CAMERA_WIDTH, Config.CAMERA_HEIGHT, Bitmap.Config.ARGB_8888)
         aOut = Allocation.createFromBitmap(rs, bmpOut)
         yuvToRgbIntrinsic.setInput(aIn)
 

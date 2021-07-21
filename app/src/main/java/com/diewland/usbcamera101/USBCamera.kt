@@ -25,6 +25,8 @@ class USBCamera(act: MainActivity, camView: UVCCameraTextureView) {
     private var isRequest = false
     private var isPreview = false
 
+    private var lastRenderTime = System.currentTimeMillis()
+
     fun open() {
         initCamHelper()
         onStart()
@@ -99,9 +101,8 @@ class USBCamera(act: MainActivity, camView: UVCCameraTextureView) {
         mUVCCameraView.setCallback(mCallback)
         mCameraHelper = UVCCameraHelper.getInstance()
 
-        // set default preview size ( default is 640x480 )
-        // mCameraHelper.setDefaultPreviewSize(1280, 720)
-        // mCameraHelper.setDefaultPreviewSize(1920, 1080)
+        // set default preview size
+        mCameraHelper.setDefaultPreviewSize(Config.CAMERA_WIDTH, Config.CAMERA_HEIGHT)
 
         // set default frame format，default is UVCCameraHelper.Frame_FORMAT_MPEG
         // if using mpeg can not record mp4,please try yuv
@@ -113,7 +114,16 @@ class USBCamera(act: MainActivity, camView: UVCCameraTextureView) {
         mCameraHelper.setOnPreviewFrameListener { nv21Yuv ->
             // Log.d(TAG, "onPreviewResult: " + nv21Yuv.size)
 
-            // TODO control fps, render when diff time OK
+            // control fps
+            if (Config.FPS != null) {
+                val now = System.currentTimeMillis()
+                val diff = now - lastRenderTime
+                val limit = 1000 / Config.FPS
+                Log.d(TAG, "$diff/$limit..")
+                if (diff < limit) return@setOnPreviewFrameListener
+                Log.d(TAG, "render!")
+                lastRenderTime = now
+            }
 
             // clone camera stream to image view
             // https://stackoverflow.com/a/43551798/466693
