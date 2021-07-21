@@ -158,13 +158,13 @@ class USBCamera(private val act: Activity,
             val image = InputImage.fromBitmap(bmpOut, 0)
             detector.process(image)
                 .addOnSuccessListener {
-                    // calc fps
+                    // control fps
                     val now = System.currentTimeMillis()
                     val diff = now - lastRenderTime
-                    val limit = 1000f / maxFps // TODO
+                    val limit = 1000f / maxFps
                     if (diff < limit) return@addOnSuccessListener
                     lastRenderTime = now
-                    val fps = 1000f / diff // TODO
+                    val fps = 1000f / diff
 
                     successCallback(bmpOut, it, fps)
                 }
