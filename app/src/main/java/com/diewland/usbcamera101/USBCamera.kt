@@ -30,15 +30,16 @@ class USBCamera(act: MainActivity, camView: UVCCameraTextureView) {
     private var isPreview = false
 
     private var lastRenderTime = System.currentTimeMillis()
-    private lateinit var p: Paint
+    private val p: Paint = Paint()
 
-    fun open() {
-        // paint style
-        p = Paint()
+    init {
+        // define paint
         p.style = Paint.Style.STROKE
         p.color = Color.YELLOW
         p.strokeWidth = 5f
+    }
 
+    fun open() {
         initCamHelper()
         onStart()
     }
