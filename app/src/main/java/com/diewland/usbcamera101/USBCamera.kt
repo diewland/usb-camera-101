@@ -234,7 +234,6 @@ class USBCamera(private val act: Activity,
         }
 
         override fun onConnectDev(device: UsbDevice?, isConnected: Boolean) {
-            /*
             if (!isConnected) {
                 showShortMsg("fail to connect,please check resolution params")
                 isPreview = false
@@ -243,6 +242,7 @@ class USBCamera(private val act: Activity,
                 showShortMsg("connecting")
                 // initialize seekbar
                 // need to wait UVCCamera initialize over
+                /*
                 Thread {
                     try {
                         Thread.sleep(2500)
@@ -256,8 +256,8 @@ class USBCamera(private val act: Activity,
                     }
                     Looper.loop()
                 }.start()
+                */
             }
-            */
         }
 
         override fun onDisConnectDev(device: UsbDevice?) {
