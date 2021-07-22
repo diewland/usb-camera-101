@@ -49,17 +49,17 @@ class MainActivity : AppCompatActivity() {
         findViewById<Button>(R.id.btn_close).setOnClickListener { usbCam.close() }
     }
 
-    override fun onStart() {
+    override fun onStart() { // TODO remove ?
         super.onStart()
         usbCam.onStart()
     }
 
-    override fun onStop() {
+    override fun onStop() { // TODO remove ?
         super.onStop()
         usbCam.onStop()
     }
 
-    override fun onDestroy() {
+    override fun onDestroy() { // TODO remove ?
         super.onDestroy()
         usbCam.onDestroy()
     }

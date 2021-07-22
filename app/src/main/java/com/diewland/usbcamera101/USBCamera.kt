@@ -68,12 +68,12 @@ class USBCamera(private val act: Activity,
         detector = FaceDetection.getClient()
     }
 
-    fun open() { // TODO crash on first time open
+    fun open() { // TODO crash ???
         initCamHelper()
         onStart()
     }
 
-    fun close() {
+    fun close() { // TODO crash ???
         onStop()
         onDestroy()
     }
