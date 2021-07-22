@@ -166,8 +166,12 @@ class USBCamera(private val act: Activity,
             yuvToRgbIntrinsic.forEach(aOut)
             aOut.copyTo(bmpOut)
 
+            // prepare image for process
+            // val image = InputImage.fromBitmap(bmpOut, 0)
+            val image = InputImage.fromByteArray(nv21Yuv,
+                width, height, 0, InputImage.IMAGE_FORMAT_NV21)
+
             // detect face
-            val image = InputImage.fromBitmap(bmpOut, 0)
             detector.process(image)
                 .addOnSuccessListener {
                     successCallback(bmpOut, it, fps)
