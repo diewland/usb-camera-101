@@ -33,7 +33,8 @@ class USBCamera(private val act: Activity,
                 private val failCallback: ((Exception) -> Unit)?=null,
                 private val width: Int = 640,
                 private val height: Int = 480,
-                private val maxFps: Int = 10) {
+                private val maxFps: Int = 10,
+                private val vendorId: Int? = null) {
 
     // state
     private var isInit = false
@@ -68,12 +69,12 @@ class USBCamera(private val act: Activity,
         detector = FaceDetection.getClient()
     }
 
-    fun open() { // TODO crash ???
+    fun open() {
         initCamHelper()
         onStart()
     }
 
-    fun close() { // TODO crash ???
+    fun close() {
         onStop()
         onDestroy()
     }
@@ -210,8 +211,10 @@ class USBCamera(private val act: Activity,
             // request open permission(must have)
             if (!isRequest) {
                 isRequest = true;
-                // scan logitech device (vendorId == 1133) TODO hardcode
-                val idx = mCameraHelper.usbDeviceList.indexOfFirst { it.vendorId == 1133 }
+                val idx = when {
+                    vendorId != null -> mCameraHelper.usbDeviceList.indexOfFirst { it.vendorId == vendorId }
+                    else -> 0
+                }
                 mCameraHelper.requestPermission(idx);
             }
         }

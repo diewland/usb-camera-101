@@ -41,7 +41,7 @@ class MainActivity : AppCompatActivity() {
             detectSuccess(bmp, faces, fps)
         }, {
             Log.e(TAG, it.stackTraceToString())
-        })
+        }, vendorId = 1133) // logitech
 
         // bind screen buttons
         findViewById<Button>(R.id.btn_open).setOnClickListener { usbCam.open() }
