@@ -79,7 +79,7 @@ class USBCamera(private val act: Activity,
     }
 
     fun capture() {
-        if (mCameraHelper == null || !mCameraHelper.isCameraOpened) {
+        if (!mCameraHelper.isCameraOpened) {
             showShortMsg("sorry,camera open failed")
             return
         }
@@ -108,18 +108,14 @@ class USBCamera(private val act: Activity,
         if (!isInit) return
 
         // step.2 register USB event broadcast
-        if (mCameraHelper != null) {
-            mCameraHelper.registerUSB()
-        }
+        mCameraHelper.registerUSB()
     }
 
     fun onStop() {
         if (!isInit) return
 
         // step.3 unregister USB event broadcast
-        if (mCameraHelper != null) {
-            mCameraHelper.unregisterUSB()
-        }
+        mCameraHelper.unregisterUSB()
     }
 
     fun onDestroy() {
@@ -127,9 +123,7 @@ class USBCamera(private val act: Activity,
 
         FileUtils.releaseFile()
         // step.4 release uvc camera resources
-        if (mCameraHelper != null) {
-            mCameraHelper.release()
-        }
+        mCameraHelper.release()
         resetState()
     }
 
@@ -216,11 +210,9 @@ class USBCamera(private val act: Activity,
             // request open permission(must have)
             if (!isRequest) {
                 isRequest = true;
-                if (mCameraHelper != null) {
-                    // scan logitech device (vendorId == 1133) TODO hardcode
-                    val idx = mCameraHelper.usbDeviceList.indexOfFirst { it.vendorId == 1133 }
-                    mCameraHelper.requestPermission(idx);
-                }
+                // scan logitech device (vendorId == 1133) TODO hardcode
+                val idx = mCameraHelper.usbDeviceList.indexOfFirst { it.vendorId == 1133 }
+                mCameraHelper.requestPermission(idx);
             }
         }
 

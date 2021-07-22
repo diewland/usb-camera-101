@@ -47,21 +47,14 @@ class MainActivity : AppCompatActivity() {
         findViewById<Button>(R.id.btn_open).setOnClickListener { usbCam.open() }
         findViewById<Button>(R.id.btn_capture).setOnClickListener { usbCam.capture() }
         findViewById<Button>(R.id.btn_close).setOnClickListener { usbCam.close() }
+
+        // auto start cam
+        usbCam.open()
     }
 
-    override fun onStart() { // TODO remove ?
-        super.onStart()
-        usbCam.onStart()
-    }
-
-    override fun onStop() { // TODO remove ?
-        super.onStop()
-        usbCam.onStop()
-    }
-
-    override fun onDestroy() { // TODO remove ?
+    override fun onDestroy() {
         super.onDestroy()
-        usbCam.onDestroy()
+        usbCam.close()
     }
 
     private fun detectSuccess(bmp: Bitmap, faces: List<Face>, fps: Float) {
