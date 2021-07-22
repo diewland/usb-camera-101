@@ -52,6 +52,13 @@ class MainActivity : AppCompatActivity() {
         usbCam.open()
     }
 
+    override fun onResume() {
+        super.onResume()
+
+        // list usb devices
+        usbCam.mCameraHelper.usbDeviceList.forEach { Log.d(TAG, "* $it") }
+    }
+
     override fun onDestroy() {
         super.onDestroy()
         usbCam.close()
