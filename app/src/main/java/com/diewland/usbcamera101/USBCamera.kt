@@ -23,6 +23,10 @@ import com.serenegiant.usb.common.AbstractUVCCameraHandler.OnCaptureListener
 import com.serenegiant.usb.widget.CameraViewInterface
 import com.serenegiant.usb.widget.UVCCameraTextureView
 
+/*  NOTE
+ *  100ms is average detection time of 640x480 -> 10fps
+ */
+
 class USBCamera(private val act: Activity,
                 private val mUVCCameraView: UVCCameraTextureView,
                 private val successCallback: (Bitmap, List<Face>, Float) -> Unit,
@@ -149,6 +153,14 @@ class USBCamera(private val act: Activity,
         mCameraHelper.initUSBMonitor(act, mUVCCameraView, mDevConnectListener)
 
         mCameraHelper.setOnPreviewFrameListener { nv21Yuv ->
+            // control fps
+            val now = System.currentTimeMillis()
+            val diff = now - lastRenderTime
+            val limit = 1000f / maxFps
+            if (diff < limit) return@setOnPreviewFrameListener
+            lastRenderTime = now
+            val fps = 1000f / diff
+
             // convert from nv21Yuv BA to Bitmap
             aIn.copyFrom(nv21Yuv)
             yuvToRgbIntrinsic.forEach(aOut)
@@ -158,14 +170,6 @@ class USBCamera(private val act: Activity,
             val image = InputImage.fromBitmap(bmpOut, 0)
             detector.process(image)
                 .addOnSuccessListener {
-                    // control fps
-                    val now = System.currentTimeMillis()
-                    val diff = now - lastRenderTime
-                    val limit = 1000f / maxFps
-                    if (diff < limit) return@addOnSuccessListener
-                    lastRenderTime = now
-                    val fps = 1000f / diff
-
                     successCallback(bmpOut, it, fps)
                 }
                 .addOnFailureListener {
