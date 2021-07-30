@@ -52,6 +52,7 @@ class MainActivity : AppCompatActivity() {
 
         // auto start cam
         usbCam.open()
+        usbCam.previewFrame()
     }
 
     override fun onResume() {
