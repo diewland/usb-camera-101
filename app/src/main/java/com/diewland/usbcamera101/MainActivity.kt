@@ -44,12 +44,10 @@ class MainActivity : AppCompatActivity() {
         }, vendorId = 1133) // logitech
 
         // bind screen buttons
-        findViewById<Button>(R.id.btn_open).setOnClickListener {
-            usbCam.open() // TODO how to start without register USB
-        }
-        findViewById<Button>(R.id.btn_close).setOnClickListener {
-            usbCam.close() // TODO how to stop without un-register USB
-        }
+        findViewById<Button>(R.id.btn_open).setOnClickListener { usbCam.open() }
+        findViewById<Button>(R.id.btn_close).setOnClickListener { usbCam.close() }
+        findViewById<Button>(R.id.btn_start).setOnClickListener { usbCam.previewFrame() }
+        findViewById<Button>(R.id.btn_stop).setOnClickListener { usbCam.stopPreviewFrame() }
         findViewById<Button>(R.id.btn_capture).setOnClickListener { usbCam.capture() }
 
         // auto start cam

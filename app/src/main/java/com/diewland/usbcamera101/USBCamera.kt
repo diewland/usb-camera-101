@@ -40,6 +40,7 @@ class USBCamera(private val act: Activity,
     private var isInit = false
     private var isRequest = false
     private var isPreview = false
+    private var isPreviewFrame = false
     private var lastRenderTime = System.currentTimeMillis()
 
     // helper
@@ -103,6 +104,9 @@ class USBCamera(private val act: Activity,
             })
     }
 
+    fun previewFrame() { isPreviewFrame = true }
+    fun stopPreviewFrame() { isPreviewFrame = false }
+
     // ---------- LIFE CYCLE ----------
 
     fun onStart() {
@@ -148,6 +152,9 @@ class USBCamera(private val act: Activity,
         mCameraHelper.initUSBMonitor(act, mUVCCameraView, mDevConnectListener)
 
         mCameraHelper.setOnPreviewFrameListener { nv21Yuv ->
+            // short circuit
+            if (!isPreviewFrame) return@setOnPreviewFrameListener
+
             // control fps
             val now = System.currentTimeMillis()
             val diff = now - lastRenderTime
@@ -266,6 +273,7 @@ class USBCamera(private val act: Activity,
         isInit = false
         isRequest = false
         isPreview = false
+        isPreviewFrame = false
     }
 
     private fun showShortMsg(msg: String) {
