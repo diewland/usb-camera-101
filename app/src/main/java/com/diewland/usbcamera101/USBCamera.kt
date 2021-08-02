@@ -68,12 +68,12 @@ class USBCamera(private val act: Activity,
         detector = FaceDetection.getClient()
     }
 
-    fun open() {
-        initCamHelper()
+    fun connect() {
+        onCreate()
         onStart()
     }
 
-    fun close() {
+    fun disconnect() {
         onStop()
         onDestroy()
     }
@@ -114,6 +114,11 @@ class USBCamera(private val act: Activity,
     }
 
     // ---------- LIFE CYCLE ----------
+
+    fun onCreate() {
+        // step.1 initialize UVCCameraHelper
+        initCamHelper()
+    }
 
     fun onStart() {
         // step.2 register USB event broadcast

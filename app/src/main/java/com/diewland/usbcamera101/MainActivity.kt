@@ -44,26 +44,31 @@ class MainActivity : AppCompatActivity() {
         }, vendorId = 1133) // logitech
 
         // bind screen buttons
-        findViewById<Button>(R.id.btn_open).setOnClickListener { usbCam.open() }
-        findViewById<Button>(R.id.btn_close).setOnClickListener { usbCam.close() }
+        findViewById<Button>(R.id.btn_open).setOnClickListener { usbCam.connect() }
+        findViewById<Button>(R.id.btn_close).setOnClickListener { usbCam.disconnect() }
         findViewById<Button>(R.id.btn_start).setOnClickListener { usbCam.preview() }
         findViewById<Button>(R.id.btn_stop).setOnClickListener { usbCam.stopPreview() }
         findViewById<Button>(R.id.btn_capture).setOnClickListener { usbCam.capture() }
 
-        // auto start cam
-        usbCam.open()
-    }
-
-    override fun onResume() {
-        super.onResume()
+        usbCam.onCreate()
 
         // list usb devices
         usbCam.mCameraHelper.usbDeviceList.forEach { Log.d(TAG, "* $it") }
     }
 
+    override fun onStart() {
+        super.onStart()
+        usbCam.onStart()
+    }
+
+    override fun onStop() {
+        super.onStop()
+        usbCam.onStop()
+    }
+
     override fun onDestroy() {
         super.onDestroy()
-        usbCam.close()
+        usbCam.onDestroy()
     }
 
     private fun detectSuccess(bmp: Bitmap, faces: List<Face>, fps: Float) {
