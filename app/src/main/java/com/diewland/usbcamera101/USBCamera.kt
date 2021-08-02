@@ -37,7 +37,6 @@ class USBCamera(private val act: Activity,
                 private val vendorId: Int? = null) {
 
     // state
-    private var isInit = false
     private var isRequest = false
     private var isPreview = false
     private var isPreviewFrame = false
@@ -110,22 +109,16 @@ class USBCamera(private val act: Activity,
     // ---------- LIFE CYCLE ----------
 
     fun onStart() {
-        if (!isInit) return
-
         // step.2 register USB event broadcast
         mCameraHelper.registerUSB()
     }
 
     fun onStop() {
-        if (!isInit) return
-
         // step.3 unregister USB event broadcast
         mCameraHelper.unregisterUSB()
     }
 
     fun onDestroy() {
-        if (!isInit) return
-
         FileUtils.releaseFile()
         // step.4 release uvc camera resources
         mCameraHelper.release()
@@ -135,8 +128,6 @@ class USBCamera(private val act: Activity,
     // ---------- CAMERA ----------
 
     private fun initCamHelper() {
-        if (isInit) return
-
         // step.1 initialize UVCCameraHelper
         mUVCCameraView.setCallback(mCallback)
         mCameraHelper = UVCCameraHelper.getInstance()
@@ -182,8 +173,6 @@ class USBCamera(private val act: Activity,
                     failCallback?.invoke(it)
                 }
         }
-
-        isInit = true
     }
 
     private val mCallback = object: CameraViewInterface.Callback {
@@ -270,7 +259,6 @@ class USBCamera(private val act: Activity,
     // ---------- TOOL ----------
 
     private fun resetState() {
-        isInit = false
         isRequest = false
         isPreview = false
         isPreviewFrame = false
