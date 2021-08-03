@@ -46,8 +46,8 @@ class MainActivity : AppCompatActivity() {
         // bind screen buttons
         findViewById<Button>(R.id.btn_open).setOnClickListener { usbCam.connect() }
         findViewById<Button>(R.id.btn_close).setOnClickListener { usbCam.disconnect() }
-        findViewById<Button>(R.id.btn_start).setOnClickListener { usbCam.preview() }
-        findViewById<Button>(R.id.btn_stop).setOnClickListener { usbCam.stopPreview() }
+        findViewById<Button>(R.id.btn_start).setOnClickListener { usbCam.open() }
+        findViewById<Button>(R.id.btn_stop).setOnClickListener { usbCam.close() }
         findViewById<Button>(R.id.btn_capture).setOnClickListener { usbCam.capture() }
 
         usbCam.onCreate()

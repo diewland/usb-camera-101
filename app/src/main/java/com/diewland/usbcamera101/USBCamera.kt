@@ -78,12 +78,12 @@ class USBCamera(private val act: Activity,
         onDestroy()
     }
 
-    fun preview() {
+    fun open() {
         if (isPreview) return
         mCameraHelper.startPreview(mUVCCameraView);
         isPreview = true;
     }
-    fun stopPreview() {
+    fun close() {
         if (!isPreview) return
         mCameraHelper.stopPreview();
         isPreview = false;

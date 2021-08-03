@@ -19,7 +19,7 @@
             android:layout_marginRight="5dp"
             android:layout_weight="1"
             android:padding="30dp"
-            android:text="Open"
+            android:text="Connect"
             android:textSize="34sp" />
 
         <Button
@@ -30,7 +30,7 @@
             android:layout_marginRight="5dp"
             android:layout_weight="1"
             android:padding="30dp"
-            android:text="Close"
+            android:text="Disconnect"
             android:textSize="34sp" />
 
     </LinearLayout>
@@ -48,7 +48,7 @@
             android:layout_marginRight="5dp"
             android:layout_weight="1"
             android:padding="30dp"
-            android:text="Start"
+            android:text="Open"
             android:textSize="34sp" />
 
         <Button
@@ -59,7 +59,7 @@
             android:layout_marginRight="5dp"
             android:layout_weight="1"
             android:padding="30dp"
-            android:text="Stop"
+            android:text="Close"
             android:textSize="34sp" />
 
         <Button
