@@ -113,7 +113,7 @@ class USBCamera(private val act: Activity,
     }
 
     fun capture() {
-        if (!mCameraHelper.isCameraOpened) {
+        if (!isInit || !mCameraHelper.isCameraOpened) {
             showShortMsg("sorry,camera open failed")
             return
         }
