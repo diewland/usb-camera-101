@@ -74,6 +74,7 @@ class USBCamera(private val act: Activity,
     fun connect() {
         if (isConnected) return
 
+        // init camera helper, first time only
         if (!isInit) {
             onCreate()
             isInit = true
@@ -286,6 +287,7 @@ class USBCamera(private val act: Activity,
     // ---------- TOOL ----------
 
     private fun resetState() {
+        isInit = false
         isConnected = false
         isRequest = false
         isPreview = false
