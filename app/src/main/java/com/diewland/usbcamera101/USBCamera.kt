@@ -37,6 +37,7 @@ class USBCamera(private val act: Activity,
                 private val vendorId: Int? = null) {
 
     // state
+    private var isInit = false
     private var isConnected = false
     private var isRequest = false
     private var isPreview = false
@@ -44,6 +45,7 @@ class USBCamera(private val act: Activity,
 
     // helper
     lateinit var mCameraHelper: UVCCameraHelper
+    private var camIdx = 0
 
     // converter
     private var yuvToRgbIntrinsic: ScriptIntrinsicYuvToRGB
@@ -71,9 +73,24 @@ class USBCamera(private val act: Activity,
 
     fun connect() {
         if (isConnected) return
-        onCreate()
-        onStart()
-        isConnected = true
+
+        if (!isInit) {
+            onCreate()
+            isInit = true
+        }
+
+        // find usb cam from vendor id
+        if (vendorId != null)
+            camIdx = mCameraHelper.usbDeviceList.indexOfFirst { it.vendorId == vendorId }
+
+        // found usb cam or use default index
+        if (camIdx > -1) {
+            onStart()
+            isConnected = true
+        }
+        else {
+            showShortMsg("CAMERA DOES NOT CONNECT, cannot find vendorId $vendorId")
+        }
     }
 
     fun disconnect() {
@@ -221,11 +238,7 @@ class USBCamera(private val act: Activity,
             // request open permission(must have)
             if (!isRequest) {
                 isRequest = true;
-                val idx = when {
-                    vendorId != null -> mCameraHelper.usbDeviceList.indexOfFirst { it.vendorId == vendorId }
-                    else -> 0
-                }
-                mCameraHelper.requestPermission(idx);
+                mCameraHelper.requestPermission(camIdx);
             }
         }
 
