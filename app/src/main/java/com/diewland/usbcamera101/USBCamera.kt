@@ -37,6 +37,7 @@ class USBCamera(private val act: Activity,
                 private val vendorId: Int? = null) {
 
     // state
+    private var isConnected = false
     private var isRequest = false
     private var isPreview = false
     private var lastRenderTime = System.currentTimeMillis()
@@ -69,22 +70,26 @@ class USBCamera(private val act: Activity,
     }
 
     fun connect() {
+        if (isConnected) return
         onCreate()
         onStart()
+        isConnected = true
     }
 
     fun disconnect() {
+        if (!isConnected) return
         onStop()
         onDestroy()
+        isConnected = false
     }
 
     fun open() {
-        if (isPreview) return
+        if (!isConnected || isPreview) return
         mCameraHelper.startPreview(mUVCCameraView);
         isPreview = true;
     }
     fun close() {
-        if (!isPreview) return
+        if (!isConnected || !isPreview) return
         mCameraHelper.stopPreview();
         isPreview = false;
     }
@@ -268,6 +273,7 @@ class USBCamera(private val act: Activity,
     // ---------- TOOL ----------
 
     private fun resetState() {
+        isConnected = false
         isRequest = false
         isPreview = false
     }
