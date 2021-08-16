@@ -6,8 +6,10 @@ import android.graphics.Color
 import android.graphics.Paint
 import android.os.Bundle
 import android.util.Log
+import android.view.ViewGroup
 import android.widget.Button
 import android.widget.ImageView
+import android.widget.LinearLayout
 import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
 import com.google.mlkit.vision.face.Face
@@ -26,9 +28,14 @@ class MainActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
 
-        val camView = findViewById<UVCCameraTextureView>(R.id.camera_view)
+        // init dom
+        val llRoot = findViewById<LinearLayout>(R.id.ll_root)
         ivPreview = findViewById(R.id.iv_preview)
         tvFps = findViewById(R.id.tv_fps)
+
+        // inject camera source
+        val camView = UVCCameraTextureView(this)
+        llRoot.addView(camView, ViewGroup.LayoutParams(0, 0))
 
         // define paint
         p = Paint()
@@ -50,25 +57,8 @@ class MainActivity : AppCompatActivity() {
         findViewById<Button>(R.id.btn_stop).setOnClickListener { usbCam.close() }
         findViewById<Button>(R.id.btn_capture).setOnClickListener { usbCam.capture() }
 
-        usbCam.onCreate()
-
         // list usb devices
-        usbCam.mCameraHelper.usbDeviceList.forEach { Log.d(TAG, "* $it") }
-    }
-
-    override fun onStart() {
-        super.onStart()
-        usbCam.onStart()
-    }
-
-    override fun onStop() {
-        super.onStop()
-        usbCam.onStop()
-    }
-
-    override fun onDestroy() {
-        super.onDestroy()
-        usbCam.onDestroy()
+        //usbCam.mCameraHelper.usbDeviceList.forEach { Log.d(TAG, "* $it") }
     }
 
     private fun detectSuccess(bmp: Bitmap, faces: List<Face>, fps: Float) {
