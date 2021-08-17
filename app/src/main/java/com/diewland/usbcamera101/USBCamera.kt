@@ -286,6 +286,10 @@ class USBCamera(private val act: Activity,
 
     // ---------- TOOL ----------
 
+    fun isConnected(): Boolean {
+        return isConnected
+    }
+
     private fun resetState() {
         isInit = false
         isConnected = false
